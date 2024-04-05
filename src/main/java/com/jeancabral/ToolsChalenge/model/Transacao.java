@@ -27,7 +27,7 @@ public class Transacao {
     @JsonProperty("id")
     private Long transacaoId;
 
-    private Integer num_cartao;
+    private String num_cartao;
 
     @Embedded
     private Descricao descricao;

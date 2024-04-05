@@ -1,5 +1,6 @@
 package com.jeancabral.ToolsChalenge.controller;
 
+import com.jeancabral.ToolsChalenge.dto.TransacaoDto;
 import com.jeancabral.ToolsChalenge.model.Transacao;
 
 import com.jeancabral.ToolsChalenge.service.impl.EstornoService;
@@ -20,14 +21,15 @@ public class EstornoController {
     }
 
     @GetMapping("/{transacaoId}")
-    public ResponseEntity<Transacao> buscaEstornoId(@PathVariable Long transacaoId){
-        Optional<Transacao> buscaTransacaoId = service.buscarEstornoId(transacaoId);
+    public ResponseEntity<TransacaoWrapper> buscaEstornoId(@PathVariable Long transacaoId) {
+        Optional<TransacaoWrapper> buscaTransacaoId = service.buscarEstornoId(transacaoId)
+                .map(TransacaoWrapper::new);
         return buscaTransacaoId.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping("/{transacaoId}")
     public ResponseEntity<TransacaoWrapper> estornaPagamento(@PathVariable Long transacaoId) {
-        Transacao buscaId = service.estornarPagamento(transacaoId);
+        TransacaoDto buscaId = service.estornarPagamento(transacaoId);
         TransacaoWrapper wrapper = new TransacaoWrapper(buscaId);
         return ResponseEntity.ok().body(wrapper);
     }

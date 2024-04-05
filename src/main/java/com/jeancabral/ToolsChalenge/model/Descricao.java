@@ -1,6 +1,7 @@
 package com.jeancabral.ToolsChalenge.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,6 +11,7 @@ import java.util.Date;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @Embeddable
 public class Descricao {
 
@@ -20,7 +22,6 @@ public class Descricao {
     private Integer codigoAutorizacao;
     private String status;
 
-    // Construtor que aceita um DescricaoPagamento e converte para Descricao
     public Descricao(DescricaoPagamento descricaoPagamento) {
         this.valor = descricaoPagamento.getValor();
         this.dataHora = descricaoPagamento.getDataHora();

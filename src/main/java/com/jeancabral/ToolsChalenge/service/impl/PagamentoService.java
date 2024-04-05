@@ -1,6 +1,7 @@
 package com.jeancabral.ToolsChalenge.service.impl;
 
 import com.jeancabral.ToolsChalenge.dto.PagamentoDto;
+import com.jeancabral.ToolsChalenge.dto.TransacaoDto;
 import com.jeancabral.ToolsChalenge.enums.StatusEnum;
 import com.jeancabral.ToolsChalenge.enums.TipoPagEnum;
 import com.jeancabral.ToolsChalenge.exception.PaymentException;
@@ -11,47 +12,53 @@ import com.jeancabral.ToolsChalenge.model.FormaPagamento;
 import com.jeancabral.ToolsChalenge.model.Transacao;
 import com.jeancabral.ToolsChalenge.repository.PagamentoRepository;
 import com.jeancabral.ToolsChalenge.service.PagamentoServiceInterface;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 
 @Service
 public class PagamentoService implements PagamentoServiceInterface {
 
+    private final ModelMapper modelMapper;
     private final PagamentoRepository repository;
 
-
-    public PagamentoService(PagamentoRepository repository) {
+    public PagamentoService(PagamentoRepository repository, ModelMapper modelMapper) {
         this.repository = repository;
+        this.modelMapper = modelMapper;
     }
 
     @Override
-    public List<Transacao> buscarPagamentos() {
-        return repository.findAll();
+    public List<TransacaoDto> buscarPagamentos() {
+        List<Transacao> transacoes = repository.findAll();
+        return transacoes.stream()
+                .map(transacao -> modelMapper.map(transacao, TransacaoDto.class))
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Optional<Transacao> buscarTransacaoId(Long transacaoId) {
-        Optional<Transacao> transacaoOptional = repository.findById(transacaoId);
-
+    public Optional<TransacaoDto> buscarTransacaoId(Long transacaoId) {
         if (transacaoId == null) {
             throw new UninformedIdException();
         }
-        if(transacaoOptional.isEmpty()){
+        Optional<Transacao> transacaoOptional = repository.findById(transacaoId);
+        if (transacaoOptional.isEmpty()) {
             throw new TransactionNotFoundException();
         }
-        return repository.findById(transacaoId);
+        Transacao transacao = transacaoOptional.get();
+        return Optional.of(modelMapper.map(transacao, TransacaoDto.class));
     }
 
     @Override
-    public Transacao efetuarPagamento(PagamentoDto pagamentoDto) {
+    public TransacaoDto efetuarPagamento(PagamentoDto pagamentoDto) {
         validarPagamentoExistente(pagamentoDto.getTransacaoId());
 
-        Transacao newPagamento = criarNovaTransacao(pagamentoDto);
+        TransacaoDto newPagamento = criarNovaTransacao(pagamentoDto);
 
         gerarNsuECodigoAutorizacao(newPagamento.getDescricao());
 
@@ -59,8 +66,12 @@ public class PagamentoService implements PagamentoServiceInterface {
 
         newPagamento.getDescricao().setStatus(StatusEnum.AUTORIZADO.name());
 
-        return repository.save(newPagamento);
+        Transacao newPagamentoDto = modelMapper.map(newPagamento, Transacao.class);
+
+        Transacao pagamentoSalvo = repository.save(newPagamentoDto);
+        return modelMapper.map(pagamentoSalvo, TransacaoDto.class);
     }
+
 
     private void validarPagamentoExistente(Long transacaoId) {
         Optional<Transacao> transacaoOptional = repository.findById(transacaoId);
@@ -72,8 +83,8 @@ public class PagamentoService implements PagamentoServiceInterface {
         }
     }
 
-    private Transacao criarNovaTransacao(PagamentoDto pagamentoDto) {
-        Transacao newPagamento = new Transacao(pagamentoDto);
+    private TransacaoDto criarNovaTransacao(PagamentoDto pagamentoDto) {
+        TransacaoDto newPagamento = new TransacaoDto(pagamentoDto);
         newPagamento.setDescricao(new Descricao(pagamentoDto.getDescricao()));
         newPagamento.setFormaPagamento(new FormaPagamento(pagamentoDto.getFormaPagamento()));
         newPagamento.setTransacaoId(pagamentoDto.getTransacaoId());
@@ -88,7 +99,7 @@ public class PagamentoService implements PagamentoServiceInterface {
         descricao.setCodigoAutorizacao(random.nextInt(999999999));
     }
 
-    private void definirTipoPagamento(Transacao transacao, PagamentoDto pagamentoDto) {
+    private void definirTipoPagamento(TransacaoDto transacao, PagamentoDto pagamentoDto) {
         FormaPagamento formaPagamento = transacao.getFormaPagamento();
 
         if (pagamentoDto.getFormaPagamento().getParcelas() <= 1) {

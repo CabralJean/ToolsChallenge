@@ -1,5 +1,6 @@
 package com.jeancabral.ToolsChalenge.service.impl;
 
+import com.jeancabral.ToolsChalenge.dto.TransacaoDto;
 import com.jeancabral.ToolsChalenge.exception.ReversalException;
 import com.jeancabral.ToolsChalenge.exception.ReversalNotFoundException;
 import com.jeancabral.ToolsChalenge.exception.TransactionNotFoundException;
@@ -19,14 +20,18 @@ import java.util.Optional;
 @Service
 public class EstornoService implements EstornoServiceInterface {
 
+    private final ModelMapper modelMapper;
     private final EstornoRepository repository;
 
-    public EstornoService(EstornoRepository repository) {
+    public EstornoService(EstornoRepository repository,ModelMapper modelMapper) {
+
         this.repository = repository;
+        this.modelMapper = modelMapper;
     }
 
     @Override
-    public Optional<Transacao> buscarEstornoId(Long transacaoId) {
+    public Optional<TransacaoDto> buscarEstornoId(Long transacaoId) {
+        ModelMapper modelMapper = new ModelMapper();
         if (transacaoId == null) {
             throw new UninformedIdException();
         }
@@ -41,7 +46,9 @@ public class EstornoService implements EstornoServiceInterface {
             return Optional.empty();
         }
 
-        return transacaoOptional;
+        TransacaoDto transacaoDto = modelMapper.map(transacao, TransacaoDto.class);
+
+        return Optional.of(transacaoDto);
     }
 
     /*public Optional<Transacao> buscarEstornoId(Long transacaoId) {
@@ -59,58 +66,34 @@ public class EstornoService implements EstornoServiceInterface {
     }*/
 
     @Override
-    public Transacao estornarPagamento(Long transacaoId){
-        /*Optional<Transacao> transacaoPagto = repository.findById(transacaoId);
+    public TransacaoDto estornarPagamento(Long transacaoId){
+        Transacao transacaoPagtoOptional = repository.findById(transacaoId)
+                .orElseThrow(TransactionNotFoundException::new);
 
-        if (transacaoPagto == null) {
-            throw new UninformedIdException();
-        }
-
-
-        Transacao estorno = new Transacao();
-        estorno.setTransacaoId(transacaoId);
-        estorno.setNum_cartao(transacaoPagto.getNum_cartao());
-
-        // Define os detalhes do estorno
-        Descricao descricaoEstorno = new Descricao();
-        descricaoEstorno.setValor(transacaoPagto.getDescricao().getValor()); // Estorna o mesmo valor
-        descricaoEstorno.setDataHora(new Date()); // Define a data e hora atual
-        descricaoEstorno.setEstabelecimento(transacaoPagto.getDescricao().getEstabelecimento());
-        descricaoEstorno.setNsu(transacaoPagto.getDescricao().getNsu()); // Busca o NSU para o estorno
-        descricaoEstorno.setCodigoAutorizacao(transacaoPagto.getDescricao().getCodigoAutorizacao()); // Busca o código de autorização
-        descricaoEstorno.setStatus(StatusEnum.CANCELADO.name()); // Define o status como "CANCELADO"
-        estorno.setDescricao(descricaoEstorno);
-
-        FormaPagamento formaPagamento = new FormaPagamento();
-        formaPagamento.setTipo(transacaoPagto.getFormaPagamento().getTipo());
-        formaPagamento.setParcelas(transacaoPagto.getFormaPagamento().getParcelas());
-
-        estorno.setFormaPagamento(formaPagamento);
-
-        // Salva a transação de estorno no banco de dados
-        estorno = repository.save(estorno);
-
-        // Retorna a transação de estorno
-        return estorno;*/
-        ModelMapper modelMapper = new ModelMapper();
-        Optional<Transacao> transacaoPagtoOptional = repository.findById(transacaoId);
-        Transacao transacaoPagto = transacaoPagtoOptional.orElseThrow(TransactionNotFoundException::new);
-        if(transacaoPagtoOptional.get().getDescricao().getStatus().equals(StatusEnum.CANCELADO.name())){
+        if(StatusEnum.CANCELADO.name().equals(transacaoPagtoOptional.getDescricao().getStatus())){
             throw new ReversalException();
         }
 
-        Transacao estorno = modelMapper.map(transacaoPagto, Transacao.class);
-        estorno.setTransacaoId(transacaoId);
+        // Mapear de Transacao para TransacaoDto
+        TransacaoDto estornoDto = modelMapper.map(transacaoPagtoOptional, TransacaoDto.class);
+        estornoDto.setTransacaoId(transacaoId);
 
-        Descricao descricaoEstorno = modelMapper.map(transacaoPagto.getDescricao(), Descricao.class);
+        Descricao descricaoEstorno = transacaoPagtoOptional.getDescricao();
         descricaoEstorno.setDataHora(new Date());
         descricaoEstorno.setStatus(StatusEnum.CANCELADO.name());
-        estorno.setDescricao(descricaoEstorno);
+        estornoDto.setDescricao(descricaoEstorno);
 
-        FormaPagamento formaPagamentoEstorno = modelMapper.map(transacaoPagto.getFormaPagamento(), FormaPagamento.class);
-        estorno.setFormaPagamento(formaPagamentoEstorno);
+        FormaPagamento formaPagamentoEstorno = transacaoPagtoOptional.getFormaPagamento();
+        estornoDto.setFormaPagamento(formaPagamentoEstorno);
 
+        // Mapear de TransacaoDto para Transacao
+        Transacao estorno = modelMapper.map(estornoDto, Transacao.class);
+
+        // Salvar o estorno no banco de dados
         estorno = repository.save(estorno);
-        return estorno;
+
+        // Retornar o estorno
+        return modelMapper.map(estorno, TransacaoDto.class);
     }
+
 }

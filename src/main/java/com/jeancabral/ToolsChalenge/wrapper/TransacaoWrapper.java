@@ -1,15 +1,15 @@
 package com.jeancabral.ToolsChalenge.wrapper;
 
+import com.jeancabral.ToolsChalenge.dto.TransacaoDto;
 import com.jeancabral.ToolsChalenge.model.Transacao;
 import lombok.*;
 
 
-@Getter
-@Setter
+@Data
 public class TransacaoWrapper {
-    private Transacao transacao;
+    private TransacaoDto transacao;
 
-    public TransacaoWrapper(Transacao transacaoObj) {
+    public TransacaoWrapper(TransacaoDto transacaoObj) {
         this.transacao = transacaoObj;
     }
 }
