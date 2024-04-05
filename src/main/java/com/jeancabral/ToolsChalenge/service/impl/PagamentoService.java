@@ -1,21 +1,26 @@
-package com.jeancabral.ToolsChalenge.service;
+package com.jeancabral.ToolsChalenge.service.impl;
 
 import com.jeancabral.ToolsChalenge.dto.PagamentoDto;
 import com.jeancabral.ToolsChalenge.enums.StatusEnum;
 import com.jeancabral.ToolsChalenge.enums.TipoPagEnum;
+import com.jeancabral.ToolsChalenge.exception.PaymentException;
+import com.jeancabral.ToolsChalenge.exception.TransactionNotFoundException;
+import com.jeancabral.ToolsChalenge.exception.UninformedIdException;
 import com.jeancabral.ToolsChalenge.model.Descricao;
 import com.jeancabral.ToolsChalenge.model.FormaPagamento;
 import com.jeancabral.ToolsChalenge.model.Transacao;
 import com.jeancabral.ToolsChalenge.repository.PagamentoRepository;
+import com.jeancabral.ToolsChalenge.service.PagamentoServiceInterface;
 import org.springframework.stereotype.Service;
 
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 
 @Service
-public class PagamentoService {
+public class PagamentoService implements PagamentoServiceInterface {
 
     private final PagamentoRepository repository;
 
@@ -24,14 +29,25 @@ public class PagamentoService {
         this.repository = repository;
     }
 
+    @Override
     public List<Transacao> buscarPagamentos() {
         return repository.findAll();
     }
 
-    public Transacao buscarPorId(Long id) {
-        return repository.findById(id).orElse(null);
+    @Override
+    public Optional<Transacao> buscarTransacaoId(Long transacaoId) {
+        Optional<Transacao> transacaoOptional = repository.findById(transacaoId);
+
+        if (transacaoId == null) {
+            throw new UninformedIdException();
+        }
+        if(transacaoOptional.isEmpty()){
+            throw new TransactionNotFoundException();
+        }
+        return repository.findById(transacaoId);
     }
 
+    @Override
     public Transacao efetuarPagamento(PagamentoDto pagamentoDto) {
         validarPagamentoExistente(pagamentoDto.getTransacaoId());
 
@@ -47,8 +63,12 @@ public class PagamentoService {
     }
 
     private void validarPagamentoExistente(Long transacaoId) {
-        if (repository.existsByTransacaoId(transacaoId)) {
-            throw new RuntimeException("Já existe um pagamento para a transação com o ID fornecido.");
+        Optional<Transacao> transacaoOptional = repository.findById(transacaoId);
+        if (transacaoOptional.isPresent()) {
+            throw new PaymentException();
+        }
+        if(transacaoId == null){
+            throw new UninformedIdException();
         }
     }
 
@@ -71,7 +91,7 @@ public class PagamentoService {
     private void definirTipoPagamento(Transacao transacao, PagamentoDto pagamentoDto) {
         FormaPagamento formaPagamento = transacao.getFormaPagamento();
 
-        if (pagamentoDto.getFormaPagamento().getParcelas() == 1) {
+        if (pagamentoDto.getFormaPagamento().getParcelas() <= 1) {
             formaPagamento.setTipo(TipoPagEnum.AVISTA.name());
 
         } else {

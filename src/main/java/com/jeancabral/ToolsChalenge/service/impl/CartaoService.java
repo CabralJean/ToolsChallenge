@@ -1,4 +1,4 @@
-package com.jeancabral.ToolsChalenge.service;
+package com.jeancabral.ToolsChalenge.service.impl;
 
 import com.jeancabral.ToolsChalenge.dto.CartaoDto;
 import com.jeancabral.ToolsChalenge.model.Cartao;

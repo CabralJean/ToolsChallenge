@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PagamentoRepository extends JpaRepository<Transacao, Long> {
 
-    boolean existsByTransacaoId(Long transacaoId);
+    //boolean existsByTransacaoId(Long transacaoId);
 }

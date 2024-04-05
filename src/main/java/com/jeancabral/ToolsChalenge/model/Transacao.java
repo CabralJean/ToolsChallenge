@@ -19,11 +19,11 @@ import lombok.Setter;
 @JsonPropertyOrder({"id", "num_cartao", "descricao", "formaPagamento"})
 public class Transacao {
 
-    @Id
-    @GeneratedValue
+    /*@GeneratedValue
     @JsonIgnore
-    private Long Id;
+    private Long Id;*/
 
+    @Id
     @JsonProperty("id")
     private Long transacaoId;
 

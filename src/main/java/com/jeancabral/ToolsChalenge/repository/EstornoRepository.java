@@ -7,5 +7,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface EstornoRepository extends JpaRepository<Transacao, Long> {
 
-    Transacao findByTransacaoId(Long transacaoId);
+    //Transacao findByTransacaoId(Long transacaoId);
+
 }

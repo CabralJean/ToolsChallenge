@@ -2,7 +2,7 @@ package com.jeancabral.ToolsChalenge.controller;
 
 import com.jeancabral.ToolsChalenge.dto.CartaoDto;
 import com.jeancabral.ToolsChalenge.model.Cartao;
-import com.jeancabral.ToolsChalenge.service.CartaoService;
+import com.jeancabral.ToolsChalenge.service.impl.CartaoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
