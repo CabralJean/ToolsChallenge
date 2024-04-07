@@ -43,7 +43,7 @@ public record PaymentResponse(
             String lastPart = cartNumber.substring(cartNumber.length() - 4);
             return firstPart + maskedPart + lastPart;
         } else {
-            return cartNumber;
+            return cartNumber; //
         }
     }
 
