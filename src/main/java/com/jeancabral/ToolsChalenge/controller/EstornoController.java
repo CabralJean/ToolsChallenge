@@ -1,14 +1,10 @@
 package com.jeancabral.ToolsChalenge.controller;
 
-import com.jeancabral.ToolsChalenge.dto.TransacaoDto;
-import com.jeancabral.ToolsChalenge.model.Transacao;
-
+import com.jeancabral.ToolsChalenge.dto.PaymentResponse;
 import com.jeancabral.ToolsChalenge.service.impl.EstornoService;
-import com.jeancabral.ToolsChalenge.wrapper.TransacaoWrapper;
+import com.jeancabral.ToolsChalenge.wrapper.TransactionWrapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/estorno")
@@ -21,17 +17,21 @@ public class EstornoController {
     }
 
     @GetMapping("/{transacaoId}")
-    public ResponseEntity<TransacaoWrapper> buscaEstornoId(@PathVariable Long transacaoId) {
-        Optional<TransacaoWrapper> buscaTransacaoId = service.buscarEstornoId(transacaoId)
-                .map(TransacaoWrapper::new);
-        return buscaTransacaoId.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<TransactionWrapper> buscaEstornoId(@PathVariable Long transacaoId) {
+        
+        final var result = service.buscarEstornoId(transacaoId);
+        
+        return ResponseEntity.ok()
+                .body(new TransactionWrapper(PaymentResponse.from(result)));
     }
 
     @PostMapping("/{transacaoId}")
-    public ResponseEntity<TransacaoWrapper> estornaPagamento(@PathVariable Long transacaoId) {
-        TransacaoDto buscaId = service.estornarPagamento(transacaoId);
-        TransacaoWrapper wrapper = new TransacaoWrapper(buscaId);
-        return ResponseEntity.ok().body(wrapper);
+    public ResponseEntity<TransactionWrapper> estornaPagamento(@PathVariable Long transacaoId) {
+        
+        final var result = service.estornarPagamento(transacaoId);
+        
+        return ResponseEntity.ok()
+                .body(new TransactionWrapper(PaymentResponse.from(result)));
     }
 
 }

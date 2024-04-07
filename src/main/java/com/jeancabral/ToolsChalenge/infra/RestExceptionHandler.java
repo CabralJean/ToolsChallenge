@@ -10,8 +10,8 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @ControllerAdvice
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(TransactionNotFoundException.class)
-    private ResponseEntity<String> transactionNotFoundHandler(TransactionNotFoundException exception){
+    @ExceptionHandler(NotFoundException.class)
+    private ResponseEntity<String> transactionNotFoundHandler(NotFoundException exception){
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Transacao não encontrada.");
     }
 
@@ -20,8 +20,8 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Estorno não encontrada.");
     }
 
-    @ExceptionHandler(ReversalException.class)
-    private ResponseEntity<String> reversalHandler(ReversalException exception){
+    @ExceptionHandler(BusinessException.class)
+    private ResponseEntity<String> reversalHandler(BusinessException exception){
         return ResponseEntity.status(HttpStatus.ALREADY_REPORTED).body("Já existe um estorno para a transação com o ID fornecido.");
     }
 

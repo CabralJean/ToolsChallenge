@@ -1,13 +1,10 @@
 package com.jeancabral.ToolsChalenge.service;
 
-import com.jeancabral.ToolsChalenge.dto.TransacaoDto;
-import com.jeancabral.ToolsChalenge.model.Transacao;
-
-import java.util.Optional;
+import com.jeancabral.ToolsChalenge.dto.TransactionDTO;
 
 public interface EstornoServiceInterface {
 
-    Optional<TransacaoDto> buscarEstornoId(Long transacaoId);
+    TransactionDTO buscarEstornoId(Long transacaoId);
 
-    TransacaoDto estornarPagamento(Long transacaoId);
+    TransactionDTO estornarPagamento(Long transacaoId);
 }

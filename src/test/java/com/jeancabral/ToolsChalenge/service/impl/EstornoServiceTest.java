@@ -1,145 +1,217 @@
 package com.jeancabral.ToolsChalenge.service.impl;
 
-import org.junit.jupiter.api.Test;
-
-import com.jeancabral.ToolsChalenge.dto.TransacaoDto;
+import com.jeancabral.ToolsChalenge.UnitTest;
+import com.jeancabral.ToolsChalenge.dto.TransactionDTO;
 import com.jeancabral.ToolsChalenge.enums.StatusEnum;
-import com.jeancabral.ToolsChalenge.exception.ReversalException;
-import com.jeancabral.ToolsChalenge.exception.ReversalNotFoundException;
-import com.jeancabral.ToolsChalenge.exception.TransactionNotFoundException;
+import com.jeancabral.ToolsChalenge.enums.TipoPagEnum;
+import com.jeancabral.ToolsChalenge.exception.BusinessException;
+import com.jeancabral.ToolsChalenge.exception.NotFoundException;
 import com.jeancabral.ToolsChalenge.model.Descricao;
 import com.jeancabral.ToolsChalenge.model.FormaPagamento;
-import com.jeancabral.ToolsChalenge.model.Transacao;
-import com.jeancabral.ToolsChalenge.repository.EstornoRepository;
-import com.jeancabral.ToolsChalenge.service.impl.EstornoService;
+import com.jeancabral.ToolsChalenge.model.TransacaoEntity;
+import com.jeancabral.ToolsChalenge.repository.TransactionRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.modelmapper.ModelMapper;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.util.Date;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-class EstornoServiceTest {
-
-    @Mock
-    private EstornoRepository repository;
+class EstornoServiceTest extends UnitTest {
 
     @Mock
-    private ModelMapper modelMapper;
+    private TransactionRepository repository;
 
     @InjectMocks
-    private EstornoService service;
+    private EstornoService estornoService;
 
     @BeforeEach
-    void setup(){
-        MockitoAnnotations.initMocks(this);
+    void setup(){}
+
+    @Test
+    @DisplayName("Deve listar o estorno por ID")
+    void findReversalById(){
+        final var expectedTransactionId = 1234L;
+
+        final var expectedDate = new Date();
+        final var expectedDescriptionValue = 20.00;
+        final var expectedDescriptionEstablishment = "LOJA 01";
+        final var expectedDescriptionNsu = "1234567890";
+        final var expectedDescriptionAuthorization = "123456789";
+        final var expectedDescriptionStatus = StatusEnum.CANCELADO.name();
+
+        final var expectedPaymentInstallments = 1;
+        final var expectedPaymentType = TipoPagEnum.AVISTA.name();
+
+        final var expectedDto = TransactionDTO.with(
+                1234L,
+                "NUM_CARTAO",
+                Descricao.with(
+                        expectedDescriptionValue,
+                        expectedDate,
+                        expectedDescriptionEstablishment,
+                        expectedDescriptionNsu,
+                        expectedDescriptionAuthorization,
+                        expectedDescriptionStatus
+                ),
+                FormaPagamento.with(
+                        expectedPaymentType,
+                        expectedPaymentInstallments
+                )
+        );
+
+        final var expectedTransactionEntity = TransacaoEntity.from(expectedDto);
+
+        when(repository.findCanceladosById(any()))
+                .thenReturn(Optional.of(expectedTransactionEntity));
+
+        final var actual = estornoService.buscarEstornoId(expectedTransactionId);
+
+        verify(repository).findCanceladosById(expectedTransactionId);
+        assertEquals(expectedTransactionEntity.getTransacaoId(), actual.transacaoId());
+
     }
 
     @Test
-    void buscarEstornoId_TransacaoNaoEncontrada_DeveLancarExcecao() {
-        // Arrange
-        Long transacaoId = 1L;
-        when(repository.findById(transacaoId)).thenReturn(Optional.empty());
+    @DisplayName("Deve retornar NotFoundException quando buscado id inexistente")
+    void transactionNotfound() {
 
-        // Act & Assert
-        assertThrows(ReversalNotFoundException.class, () -> {
-            service.buscarEstornoId(transacaoId);
-        });
+        final var expectedNotFoundTransactionId = 1343466565L;
+
+        when(repository.findCanceladosById(any()))
+                .thenReturn(Optional.empty());
+
+        final var actual = assertThrows(
+                NotFoundException.class,
+                () -> estornoService.buscarEstornoId(expectedNotFoundTransactionId)
+        );
+
+        final var expectedErrorMessage = "Transação não encontrada com o ID fornecido: " + expectedNotFoundTransactionId;
+
+        assertEquals(expectedErrorMessage,actual.getMessage());
     }
 
     @Test
-    void buscarEstornoId_TransacaoCancelada_RetornaTransacaoDto() {
-        // Arrange
-        Long transacaoId = 1L;
-        Transacao transacao = new Transacao();
-        transacao.setTransacaoId(transacaoId);
-        Descricao descricao = new Descricao();
-        descricao.setStatus(StatusEnum.CANCELADO.name());
-        transacao.setDescricao(descricao);
-        when(repository.findById(transacaoId)).thenReturn(Optional.of(transacao));
+    @DisplayName("Deve efetuar o estorno e retornar os dados do mesmo")
+    void estornarPagamento() {
 
-        // Act
-        Optional<TransacaoDto> result = service.buscarEstornoId(transacaoId);
+        final var expectedDescriptionValue = 20.00;
+        final var expectedDescriptionEstablishment = "LOJA 01";
+        final var expectedDescriptionNsu = "1234567890";
+        final var expectedDescriptionAuthorization = "123456789";
 
-        // Assert
-        assertTrue(result.isPresent());
-        assertEquals(transacaoId, result.get().getTransacaoId());
+        final var expectedPaymentInstallments = 1;
+        final var expectedPaymentType = TipoPagEnum.AVISTA.name();
+
+        final var expectedTransactionId = 1234L;
+        final var expectedDate = new Date();
+        final var expectedDescriptionStatus = StatusEnum.AUTORIZADO.name();
+
+        final var expectedDto = TransactionDTO.with(
+                1234L,
+                "NUM_CARTAO",
+                Descricao.with(
+                        expectedDescriptionValue,
+                        expectedDate,
+                        expectedDescriptionEstablishment,
+                        expectedDescriptionNsu,
+                        expectedDescriptionAuthorization,
+                        expectedDescriptionStatus
+                ),
+                FormaPagamento.with(
+                        expectedPaymentType,
+                        expectedPaymentInstallments
+                )
+        );
+
+        final var expectedTransactionEntity = TransacaoEntity.from(expectedDto);
+
+        when(repository.findById(any()))
+                .thenReturn(Optional.of(expectedTransactionEntity));
+
+        when(repository.save(any()))
+                .thenReturn(expectedTransactionEntity);
+
+        final var actual = estornoService.estornarPagamento(expectedTransactionId);
+
+        assertNotNull(actual);
+        assertEquals(StatusEnum.CANCELADO.name(), actual.descricao().getStatus());
+
     }
 
     @Test
-    void estornarPagamento_TransacaoNaoEncontrada_DeveLancarExcecao() {
-        // Arrange
-        Long transacaoId = 1L;
-        when(repository.findById(transacaoId)).thenReturn(Optional.empty());
+    @DisplayName("Deve retornar BusinessException para estorno duplicado")
+    void estornoJaExecutado() {
 
-        // Act & Assert
-        assertThrows(TransactionNotFoundException.class, () -> {
-            service.estornarPagamento(transacaoId);
-        });
+        final var expectedDescriptionValue = 20.00;
+        final var expectedDescriptionEstablishment = "LOJA 01";
+        final var expectedDescriptionNsu = "1234567890";
+        final var expectedDescriptionAuthorization = "123456789";
+
+        final var expectedPaymentInstallments = 1;
+        final var expectedPaymentType = TipoPagEnum.AVISTA.name();
+
+        final var expectedTransactionId = 1234L;
+        final var expectedDate = new Date();
+        final var expectedDescriptionStatus = StatusEnum.CANCELADO.name();
+
+        final var expectedDto = TransactionDTO.with(
+                1234L,
+                "NUM_CARTAO",
+                Descricao.with(
+                        expectedDescriptionValue,
+                        expectedDate,
+                        expectedDescriptionEstablishment,
+                        expectedDescriptionNsu,
+                        expectedDescriptionAuthorization,
+                        expectedDescriptionStatus
+                ),
+                FormaPagamento.with(
+                        expectedPaymentType,
+                        expectedPaymentInstallments
+                )
+        );
+
+        final var expectedTransactionEntity = TransacaoEntity.from(expectedDto);
+
+        when(repository.findById(any()))
+                .thenReturn(Optional.of(expectedTransactionEntity));
+
+        final var actual = assertThrows(
+                BusinessException.class,
+                () -> estornoService.estornarPagamento(expectedTransactionId)
+        );
+
+        final var expectedErrorMessage = "Já existe um estorno para a transação com o ID fornecido.";
+
+        assertEquals(expectedErrorMessage, actual.getMessage());
+
     }
 
     @Test
-    void estornarPagamento_TransacaoCancelada_DeveLancarExcecao() {
-        // Arrange
-        Long transacaoId = 1L;
-        Transacao transacao = new Transacao();
-        transacao.setTransacaoId(transacaoId);
-        Descricao descricao = new Descricao();
-        descricao.setStatus(StatusEnum.CANCELADO.name());
-        transacao.setDescricao(descricao);
-        when(repository.findById(transacaoId)).thenReturn(Optional.of(transacao));
+    @DisplayName("Deve retornar NotFoundException quando buscado id inexistente")
+    void reversalTransactionNotfound() {
 
-        // Act & Assert
-        assertThrows(ReversalException.class, () -> {
-            service.estornarPagamento(transacaoId);
-        });
+        final var expectedNotFoundTransactionId = 1343466565L;
+
+        when(repository.findById(any()))
+                .thenReturn(Optional.empty());
+
+        final var actual = assertThrows(
+                NotFoundException.class,
+                () -> estornoService.estornarPagamento(expectedNotFoundTransactionId)
+        );
+
+        final var expectedErrorMessage = "Transação não encontrada com o ID fornecido: " + expectedNotFoundTransactionId;
+
+        assertEquals(expectedErrorMessage,actual.getMessage());
     }
-
-    @Test
-    void estornarPagamento_TransacaoValida_RetornaTransacaoDto() {
-        // Arrange
-        Long transacaoId = 1L;
-        Transacao transacao = new Transacao();
-        transacao.setTransacaoId(transacaoId);
-        Descricao descricao = new Descricao();
-        descricao.setStatus(StatusEnum.AUTORIZADO.name());
-        descricao.setDataHora(new Date());
-        transacao.setDescricao(descricao);
-
-        // Mock do método save para retornar a transacao salva
-        when(repository.save(any(Transacao.class))).thenAnswer(invocation -> {
-            Transacao savedTransacao = invocation.getArgument(0);
-            savedTransacao.setTransacaoId(123L); // Mocking the saved transaction ID
-            return savedTransacao;
-        });
-
-        // Mock do findById para retornar a transacao criada
-        when(repository.findById(transacaoId)).thenReturn(Optional.of(transacao));
-
-        // Mock do mapeamento de Transacao para TransacaoDto
-        TransacaoDto transacaoDtoMock = new TransacaoDto();
-        TransacaoDto transacaoMock = new TransacaoDto();
-        transacaoDtoMock.setTransacaoId(transacaoMock.getTransacaoId());
-        when(modelMapper.map(transacao, TransacaoDto.class)).thenReturn(transacaoDtoMock);
-
-        // Act
-        TransacaoDto result = service.estornarPagamento(transacaoId);
-
-        // Assert
-        assertNotNull(result);
-        assertEquals(123L, result.getTransacaoId()); // Verifique se o ID foi alterado para o ID mockado
-        //assertEquals(StatusEnum.CANCELADO.name(), result.getTransacaoId().getDescricao().getStatus());
-    }
-
-
-
-
 
 }

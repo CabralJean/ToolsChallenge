@@ -1,17 +1,15 @@
 package com.jeancabral.ToolsChalenge.service;
 
-import com.jeancabral.ToolsChalenge.dto.PagamentoDto;
-import com.jeancabral.ToolsChalenge.dto.TransacaoDto;
-import com.jeancabral.ToolsChalenge.model.Transacao;
+import com.jeancabral.ToolsChalenge.dto.PaymentRequest;
+import com.jeancabral.ToolsChalenge.dto.TransactionDTO;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface PagamentoServiceInterface {
 
-    List<TransacaoDto> buscarPagamentos();
+    List<TransactionDTO> buscarPagamentos();
 
-    Optional<TransacaoDto> buscarTransacaoId(Long transacaoId);
+    TransactionDTO buscarTransacaoId(Long transacaoId);
 
-    TransacaoDto efetuarPagamento(PagamentoDto pagamentoDto);
+    TransactionDTO efetuarPagamento(PaymentRequest pagamentoDto);
 }
