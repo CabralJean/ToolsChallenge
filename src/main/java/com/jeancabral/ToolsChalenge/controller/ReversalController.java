@@ -17,7 +17,7 @@ public class ReversalController {
     }
 
     @GetMapping("/{transactionId}")
-    public ResponseEntity<TransactionWrapper> buscaEstornoId(@PathVariable Long transactionId) {
+    public ResponseEntity<TransactionWrapper> findReversalById(@PathVariable Long transactionId) {
         
         final var result = service.buscarEstornoId(transactionId);
         
@@ -26,7 +26,7 @@ public class ReversalController {
     }
 
     @PostMapping("/{transactionId}")
-    public ResponseEntity<TransactionWrapper> estornaPagamento(@PathVariable Long transactionId) {
+    public ResponseEntity<TransactionWrapper> reversalPayment(@PathVariable Long transactionId) {
         
         final var result = service.reversalPayment(transactionId);
         
