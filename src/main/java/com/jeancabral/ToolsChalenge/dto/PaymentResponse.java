@@ -30,7 +30,7 @@ public record PaymentResponse(
 
         return new PaymentResponse(
                 transaction.transacaoId().toString(),
-                cartNumber, //transaction.numCartao(),
+                cartNumber,
                 DescriptionResponse.from(transaction.descricao()),
                 PaymentMethodResponse.from(transaction.formaPagamento())
         );
