@@ -11,8 +11,8 @@ public class SwaggerConfig {
 
     @Bean
     public OpenAPI customAPI(){
-        return new OpenAPI().info(new Info().title("Swagger Example API").version("1.0.0")
-                .license(new License().name("Licença do sistema").url("ToolsChalenge"))
+        return new OpenAPI().info(new Info().title("Swagger Payment API").version("1.0.0")
+                .license(new License().name("Licença do sistema"))
         );
     }
 }

@@ -25,6 +25,20 @@ public record PaymentResponse(
                 PaymentMethodResponse.from(transaction.formaPagamento())
         );
     }
-    
+
+    // Construtor alternativo que aplica a máscara no número do cartão
+    public PaymentResponse {
+        this.id = id;
+        this.description = description;
+        this.paymentMethod = paymentMethod;
+        if (cartNumber != null && cartNumber.length() >= 12) {
+            String firstPart = cartNumber.substring(0, 4);
+            String maskedPart = "******";
+            String lastPart = cartNumber.substring(cartNumber.length() - 4);
+            this.cartNumber = firstPart + maskedPart + lastPart;
+        } else {
+            this.cartNumber = cartNumber;
+        }
+    }
     
 }

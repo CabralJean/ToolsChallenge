@@ -5,11 +5,11 @@ import com.jeancabral.ToolsChalenge.ControllerTest;
 import com.jeancabral.ToolsChalenge.dto.PaymentRequest;
 import com.jeancabral.ToolsChalenge.dto.TransactionDTO;
 import com.jeancabral.ToolsChalenge.enums.StatusEnum;
-import com.jeancabral.ToolsChalenge.enums.TipoPagEnum;
-import com.jeancabral.ToolsChalenge.model.Descricao;
-import com.jeancabral.ToolsChalenge.model.DescricaoPagamento;
-import com.jeancabral.ToolsChalenge.model.FormaPagamento;
-import com.jeancabral.ToolsChalenge.service.impl.PagamentoService;
+import com.jeancabral.ToolsChalenge.enums.TypePagEnum;
+import com.jeancabral.ToolsChalenge.model.Description;
+import com.jeancabral.ToolsChalenge.model.PaymentDescription;
+import com.jeancabral.ToolsChalenge.model.PaymentMethod;
+import com.jeancabral.ToolsChalenge.service.impl.PaymentService;
 import com.jeancabral.ToolsChalenge.util.JsonUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,13 +34,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ControllerTest
 public class PaymentControllerTest {
     
-    private final static String BASE_URL = "/api/transacoes";
+    private final static String BASE_URL = "/api/transaction";
     
     @Autowired
     private MockMvc mvc;
     
     @MockBean
-    private PagamentoService service;
+    private PaymentService service;
 
     
     @Test
@@ -56,13 +56,13 @@ public class PaymentControllerTest {
         final var expectedDescriptionStatus = StatusEnum.AUTORIZADO.name();
         
         final var expectedPaymentInstallments = 1;
-        final var expectedPaymentType = TipoPagEnum.AVISTA;
+        final var expectedPaymentType = TypePagEnum.AVISTA;
         
         final var expectedPaymentsResponse = List.of(
                 TransactionDTO.with(
                         expectedTransactionId,
                         expectedCartNumber,
-                        Descricao.with(
+                        Description.with(
                                 expectedDescriptionValue,
                                 expectedDate,
                                 expectedDescriptionEstablishment,
@@ -70,14 +70,14 @@ public class PaymentControllerTest {
                                 expectedDescriptionAuthorization,
                                 expectedDescriptionStatus
                         ),
-                        FormaPagamento.with(
+                        PaymentMethod.with(
                                 expectedPaymentType.name(),
                                 expectedPaymentInstallments
                         )
                 )
         );
         
-        when(service.buscarPagamentos())
+        when(service.findTransactions())
                 .thenReturn(expectedPaymentsResponse);
         
         final var request = get(BASE_URL)
@@ -124,12 +124,12 @@ public class PaymentControllerTest {
         final var expectedDescriptionStatus = StatusEnum.AUTORIZADO.name();
         
         final var expectedPaymentInstallments = 1;
-        final var expectedPaymentType = TipoPagEnum.AVISTA;
+        final var expectedPaymentType = TypePagEnum.AVISTA;
         
         final var expectedPaymentsResponse = TransactionDTO.with(
                         expectedTransactionId,
                         expectedCartNumber,
-                        Descricao.with(
+                        Description.with(
                                 expectedDescriptionValue,
                                 expectedDate,
                                 expectedDescriptionEstablishment,
@@ -137,18 +137,18 @@ public class PaymentControllerTest {
                                 expectedDescriptionAuthorization,
                                 expectedDescriptionStatus
                         ),
-                        FormaPagamento.with(
+                        PaymentMethod.with(
                                 expectedPaymentType.name(),
                                 expectedPaymentInstallments
                         )
         );
         
-        final var expectedPayment = FormaPagamento.with(
+        final var expectedPayment = PaymentMethod.with(
                 expectedPaymentType.name(),
                 expectedPaymentInstallments
         );
         
-        final var expectedDescriptionPayment = DescricaoPagamento.with(
+        final var expectedDescriptionPayment = PaymentDescription.with(
                 expectedDescriptionValue,
                 expectedDate,
                 expectedDescriptionEstablishment
@@ -161,10 +161,10 @@ public class PaymentControllerTest {
                 expectedPayment
         );
         
-        when(service.efetuarPagamento(any()))
+        when(service.createPayment(any()))
                 .thenReturn(expectedPaymentsResponse);
         
-        final var request = post(BASE_URL+"/pagamento")
+        final var request = post(BASE_URL+"/payment")
                 .content(JsonUtils.json(expectedRequest))
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON);
@@ -209,12 +209,12 @@ public class PaymentControllerTest {
         final var expectedDescriptionStatus = StatusEnum.AUTORIZADO.name();
 
         final var expectedPaymentInstallments = 1;
-        final var expectedPaymentType = TipoPagEnum.AVISTA;
+        final var expectedPaymentType = TypePagEnum.AVISTA;
 
         final var expectedPaymentsResponse = TransactionDTO.with(
                 expectedTransactionId,
                 expectedCartNumber,
-                Descricao.with(
+                Description.with(
                         expectedDescriptionValue,
                         expectedDate,
                         expectedDescriptionEstablishment,
@@ -222,16 +222,16 @@ public class PaymentControllerTest {
                         expectedDescriptionAuthorization,
                         expectedDescriptionStatus
                 ),
-                FormaPagamento.with(
+                PaymentMethod.with(
                         expectedPaymentType.name(),
                         expectedPaymentInstallments
                 )
 
         );
 
-        when(service.buscarTransacaoId(any())).thenReturn(expectedPaymentsResponse);
+        when(service.findTransactionById(any())).thenReturn(expectedPaymentsResponse);
 
-        final var request = get(BASE_URL + "/{transacaoId}", 1234L)
+        final var request = get(BASE_URL + "/{transactionId}", 1234L)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON);
 

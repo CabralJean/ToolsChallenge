@@ -3,12 +3,12 @@ package com.jeancabral.ToolsChalenge.service.impl;
 import com.jeancabral.ToolsChalenge.UnitTest;
 import com.jeancabral.ToolsChalenge.dto.TransactionDTO;
 import com.jeancabral.ToolsChalenge.enums.StatusEnum;
-import com.jeancabral.ToolsChalenge.enums.TipoPagEnum;
+import com.jeancabral.ToolsChalenge.enums.TypePagEnum;
 import com.jeancabral.ToolsChalenge.exception.BusinessException;
 import com.jeancabral.ToolsChalenge.exception.NotFoundException;
-import com.jeancabral.ToolsChalenge.model.Descricao;
-import com.jeancabral.ToolsChalenge.model.FormaPagamento;
-import com.jeancabral.ToolsChalenge.model.TransacaoEntity;
+import com.jeancabral.ToolsChalenge.model.Description;
+import com.jeancabral.ToolsChalenge.model.PaymentMethod;
+import com.jeancabral.ToolsChalenge.model.TransactionEntity;
 import com.jeancabral.ToolsChalenge.repository.TransactionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -24,13 +24,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-class EstornoServiceTest extends UnitTest {
+class ReversalServiceTest extends UnitTest {
 
     @Mock
     private TransactionRepository repository;
 
     @InjectMocks
-    private EstornoService estornoService;
+    private ReversalService estornoService;
 
     @BeforeEach
     void setup(){}
@@ -48,12 +48,12 @@ class EstornoServiceTest extends UnitTest {
         final var expectedDescriptionStatus = StatusEnum.CANCELADO.name();
 
         final var expectedPaymentInstallments = 1;
-        final var expectedPaymentType = TipoPagEnum.AVISTA.name();
+        final var expectedPaymentType = TypePagEnum.AVISTA.name();
 
         final var expectedDto = TransactionDTO.with(
                 1234L,
                 "NUM_CARTAO",
-                Descricao.with(
+                Description.with(
                         expectedDescriptionValue,
                         expectedDate,
                         expectedDescriptionEstablishment,
@@ -61,13 +61,13 @@ class EstornoServiceTest extends UnitTest {
                         expectedDescriptionAuthorization,
                         expectedDescriptionStatus
                 ),
-                FormaPagamento.with(
+                PaymentMethod.with(
                         expectedPaymentType,
                         expectedPaymentInstallments
                 )
         );
 
-        final var expectedTransactionEntity = TransacaoEntity.from(expectedDto);
+        final var expectedTransactionEntity = TransactionEntity.from(expectedDto);
 
         when(repository.findCanceladosById(any()))
                 .thenReturn(Optional.of(expectedTransactionEntity));
@@ -108,7 +108,7 @@ class EstornoServiceTest extends UnitTest {
         final var expectedDescriptionAuthorization = "123456789";
 
         final var expectedPaymentInstallments = 1;
-        final var expectedPaymentType = TipoPagEnum.AVISTA.name();
+        final var expectedPaymentType = TypePagEnum.AVISTA.name();
 
         final var expectedTransactionId = 1234L;
         final var expectedDate = new Date();
@@ -117,7 +117,7 @@ class EstornoServiceTest extends UnitTest {
         final var expectedDto = TransactionDTO.with(
                 1234L,
                 "NUM_CARTAO",
-                Descricao.with(
+                Description.with(
                         expectedDescriptionValue,
                         expectedDate,
                         expectedDescriptionEstablishment,
@@ -125,13 +125,13 @@ class EstornoServiceTest extends UnitTest {
                         expectedDescriptionAuthorization,
                         expectedDescriptionStatus
                 ),
-                FormaPagamento.with(
+                PaymentMethod.with(
                         expectedPaymentType,
                         expectedPaymentInstallments
                 )
         );
 
-        final var expectedTransactionEntity = TransacaoEntity.from(expectedDto);
+        final var expectedTransactionEntity = TransactionEntity.from(expectedDto);
 
         when(repository.findById(any()))
                 .thenReturn(Optional.of(expectedTransactionEntity));
@@ -139,7 +139,7 @@ class EstornoServiceTest extends UnitTest {
         when(repository.save(any()))
                 .thenReturn(expectedTransactionEntity);
 
-        final var actual = estornoService.estornarPagamento(expectedTransactionId);
+        final var actual = estornoService.reversalPayment(expectedTransactionId);
 
         assertNotNull(actual);
         assertEquals(StatusEnum.CANCELADO.name(), actual.descricao().getStatus());
@@ -156,7 +156,7 @@ class EstornoServiceTest extends UnitTest {
         final var expectedDescriptionAuthorization = "123456789";
 
         final var expectedPaymentInstallments = 1;
-        final var expectedPaymentType = TipoPagEnum.AVISTA.name();
+        final var expectedPaymentType = TypePagEnum.AVISTA.name();
 
         final var expectedTransactionId = 1234L;
         final var expectedDate = new Date();
@@ -165,7 +165,7 @@ class EstornoServiceTest extends UnitTest {
         final var expectedDto = TransactionDTO.with(
                 1234L,
                 "NUM_CARTAO",
-                Descricao.with(
+                Description.with(
                         expectedDescriptionValue,
                         expectedDate,
                         expectedDescriptionEstablishment,
@@ -173,23 +173,23 @@ class EstornoServiceTest extends UnitTest {
                         expectedDescriptionAuthorization,
                         expectedDescriptionStatus
                 ),
-                FormaPagamento.with(
+                PaymentMethod.with(
                         expectedPaymentType,
                         expectedPaymentInstallments
                 )
         );
 
-        final var expectedTransactionEntity = TransacaoEntity.from(expectedDto);
+        final var expectedTransactionEntity = TransactionEntity.from(expectedDto);
 
         when(repository.findById(any()))
                 .thenReturn(Optional.of(expectedTransactionEntity));
 
         final var actual = assertThrows(
                 BusinessException.class,
-                () -> estornoService.estornarPagamento(expectedTransactionId)
+                () -> estornoService.reversalPayment(expectedTransactionId)
         );
 
-        final var expectedErrorMessage = "Já existe um estorno para a transação com o ID fornecido.";
+        final var expectedErrorMessage = "Já existe um estorno para a transação com o ID fornecido: "+expectedTransactionId;
 
         assertEquals(expectedErrorMessage, actual.getMessage());
 
@@ -206,7 +206,7 @@ class EstornoServiceTest extends UnitTest {
 
         final var actual = assertThrows(
                 NotFoundException.class,
-                () -> estornoService.estornarPagamento(expectedNotFoundTransactionId)
+                () -> estornoService.reversalPayment(expectedNotFoundTransactionId)
         );
 
         final var expectedErrorMessage = "Transação não encontrada com o ID fornecido: " + expectedNotFoundTransactionId;

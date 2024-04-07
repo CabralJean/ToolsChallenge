@@ -3,11 +3,10 @@ package com.jeancabral.ToolsChalenge.controller;
 import com.jeancabral.ToolsChalenge.ControllerTest;
 import com.jeancabral.ToolsChalenge.dto.TransactionDTO;
 import com.jeancabral.ToolsChalenge.enums.StatusEnum;
-import com.jeancabral.ToolsChalenge.enums.TipoPagEnum;
-import com.jeancabral.ToolsChalenge.model.Descricao;
-import com.jeancabral.ToolsChalenge.model.FormaPagamento;
-import com.jeancabral.ToolsChalenge.service.impl.EstornoService;
-import com.jeancabral.ToolsChalenge.util.JsonUtils;
+import com.jeancabral.ToolsChalenge.enums.TypePagEnum;
+import com.jeancabral.ToolsChalenge.model.Description;
+import com.jeancabral.ToolsChalenge.model.PaymentMethod;
+import com.jeancabral.ToolsChalenge.service.impl.ReversalService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -29,13 +28,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ControllerTest
 public class ReversalControllerTest {
 
-    private final static String BASE_URL = "/api/estorno";
+    private final static String BASE_URL = "/api/reversal";
 
     @Autowired
     private MockMvc mvc;
 
     @MockBean
-    private EstornoService service;
+    private ReversalService service;
 
 
     @Test
@@ -51,12 +50,12 @@ public class ReversalControllerTest {
         final var expectedDescriptionStatus = StatusEnum.CANCELADO.name();
 
         final var expectedPaymentInstallments = 1;
-        final var expectedPaymentType = TipoPagEnum.AVISTA;
+        final var expectedPaymentType = TypePagEnum.AVISTA;
 
         final var expectedReversalResponse = TransactionDTO.with(
                 expectedTransactionId,
                 expectedCartNumber,
-                Descricao.with(
+                Description.with(
                         expectedDescriptionValue,
                         expectedDate,
                         expectedDescriptionEstablishment,
@@ -64,7 +63,7 @@ public class ReversalControllerTest {
                         expectedDescriptionAuthorization,
                         expectedDescriptionStatus
                 ),
-                FormaPagamento.with(
+                PaymentMethod.with(
                         expectedPaymentType.name(),
                         expectedPaymentInstallments
                 )
@@ -117,12 +116,12 @@ public class ReversalControllerTest {
         final var expectedDescriptionStatus = StatusEnum.CANCELADO.name();
 
         final var expectedPaymentInstallments = 1;
-        final var expectedPaymentType = TipoPagEnum.AVISTA;
+        final var expectedPaymentType = TypePagEnum.AVISTA;
 
         final var expectedReversalResponse = TransactionDTO.with(
                 expectedTransactionId,
                 expectedCartNumber,
-                Descricao.with(
+                Description.with(
                         expectedDescriptionValue,
                         expectedDate,
                         expectedDescriptionEstablishment,
@@ -130,15 +129,15 @@ public class ReversalControllerTest {
                         expectedDescriptionAuthorization,
                         expectedDescriptionStatus
                 ),
-                FormaPagamento.with(
+                PaymentMethod.with(
                         expectedPaymentType.name(),
                         expectedPaymentInstallments
                 )
         );
 
-        when(service.estornarPagamento(any())).thenReturn(expectedReversalResponse);
+        when(service.reversalPayment(any())).thenReturn(expectedReversalResponse);
 
-        final var request = post(BASE_URL+"/{transacaoId}", 1234L)
+        final var request = post(BASE_URL+"/{transactionId}", 1234L)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON);
 

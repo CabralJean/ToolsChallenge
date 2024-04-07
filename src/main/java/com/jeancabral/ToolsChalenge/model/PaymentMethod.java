@@ -3,16 +3,16 @@ package com.jeancabral.ToolsChalenge.model;
 import jakarta.persistence.Embeddable;
 
 @Embeddable
-public record FormaPagamento (
+public record PaymentMethod(
         String tipo,
         Integer parcelas
 ) {
     
-    public static FormaPagamento with(
+    public static PaymentMethod with(
             final String tipo,
             final Integer parcelas
     ) {
         
-        return new FormaPagamento(tipo, parcelas);
+        return new PaymentMethod(tipo, parcelas);
     }
 }

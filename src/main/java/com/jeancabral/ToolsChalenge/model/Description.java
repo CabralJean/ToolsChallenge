@@ -5,20 +5,15 @@ import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-import java.time.LocalDate;
 import java.util.Date;
 import java.util.Random;
-
-import static com.jeancabral.ToolsChalenge.enums.TipoPagEnum.AVISTA;
-import static com.jeancabral.ToolsChalenge.enums.TipoPagEnum.PARCELADO_EMISSOR;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Embeddable
-public class Descricao {
+public class Description {
 
     private double valor;
     private Date dataHora;
@@ -27,7 +22,7 @@ public class Descricao {
     private String codigoAutorizacao;
     private String status;
     
-    public static Descricao with(
+    public static Description with(
             final double valor,
             final Date dataHora,
             final String estabelecimento,
@@ -36,7 +31,7 @@ public class Descricao {
             final String status
     ) {
         
-        return new Descricao(
+        return new Description(
                 valor,
                 dataHora,
                 estabelecimento,
@@ -47,8 +42,8 @@ public class Descricao {
     }
     
     
-    public static Descricao from(
-            final DescricaoPagamento descricaoPagamento
+    public static Description from(
+            final PaymentDescription descricaoPagamento
     ) {
         
         Random random = new Random();
@@ -68,7 +63,7 @@ public class Descricao {
         
     }
     
-    public Descricao estornar() {
+    public Description estornar() {
         this.status = StatusEnum.CANCELADO.name();
         this.dataHora = new Date();
         return this;

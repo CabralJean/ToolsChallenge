@@ -1,7 +1,7 @@
 package com.jeancabral.ToolsChalenge.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.jeancabral.ToolsChalenge.model.FormaPagamento;
+import com.jeancabral.ToolsChalenge.model.PaymentMethod;
 
 public record PaymentMethodResponse(
         @JsonProperty("tipo")
@@ -10,7 +10,7 @@ public record PaymentMethodResponse(
         Integer installments
 ) {
     
-    public static PaymentMethodResponse from(final FormaPagamento paymentMethod) {
+    public static PaymentMethodResponse from(final PaymentMethod paymentMethod) {
         
         return new PaymentMethodResponse(paymentMethod.tipo(), paymentMethod.parcelas());
     }

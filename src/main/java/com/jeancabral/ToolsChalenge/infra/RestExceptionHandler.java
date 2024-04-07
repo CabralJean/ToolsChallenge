@@ -15,11 +15,6 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Transacao não encontrada.");
     }
 
-    @ExceptionHandler(ReversalNotFoundException.class)
-    private ResponseEntity<String> reversalNotFoundHandler(ReversalNotFoundException exception){
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Estorno não encontrada.");
-    }
-
     @ExceptionHandler(BusinessException.class)
     private ResponseEntity<String> reversalHandler(BusinessException exception){
         return ResponseEntity.status(HttpStatus.ALREADY_REPORTED).body("Já existe um estorno para a transação com o ID fornecido.");

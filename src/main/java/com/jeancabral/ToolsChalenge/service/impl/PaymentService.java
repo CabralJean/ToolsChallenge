@@ -4,10 +4,11 @@ import com.jeancabral.ToolsChalenge.dto.PaymentRequest;
 import com.jeancabral.ToolsChalenge.dto.TransactionDTO;
 import com.jeancabral.ToolsChalenge.exception.BusinessException;
 import com.jeancabral.ToolsChalenge.exception.NotFoundException;
-import com.jeancabral.ToolsChalenge.model.Descricao;
-import com.jeancabral.ToolsChalenge.model.TransacaoEntity;
+import com.jeancabral.ToolsChalenge.exception.PaymentException;
+import com.jeancabral.ToolsChalenge.model.Description;
+import com.jeancabral.ToolsChalenge.model.TransactionEntity;
 import com.jeancabral.ToolsChalenge.repository.TransactionRepository;
-import com.jeancabral.ToolsChalenge.service.PagamentoServiceInterface;
+import com.jeancabral.ToolsChalenge.service.PaymentServiceInterface;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,49 +16,49 @@ import java.util.List;
 import static com.jeancabral.ToolsChalenge.util.CollectionUtil.mapTo;
 
 @Service
-public class PagamentoService implements PagamentoServiceInterface {
+public class PaymentService implements PaymentServiceInterface {
 
     private final TransactionRepository repository;
 
-    public PagamentoService(TransactionRepository repository) {
+    public PaymentService(TransactionRepository repository) {
         this.repository = repository;
     }
 
     @Override
-    public List<TransactionDTO> buscarPagamentos() {
+    public List<TransactionDTO> findTransactions() {
         
-        return mapTo(repository.findAll(), TransacaoEntity::toDto);
+        return mapTo(repository.findAll(), TransactionEntity::toDto);
     }
 
     @Override
-    public TransactionDTO buscarTransacaoId(Long transacaoId) {
+    public TransactionDTO findTransactionById(final Long transactionId) {
         
-        return repository.findById(transacaoId)
-                .map(TransacaoEntity::toDto)
+        return repository.findById(transactionId)
+                .map(TransactionEntity::toDto)
                 .orElseThrow(() -> new NotFoundException("Transação não encontrada."));
     }
 
     @Override
-    public TransactionDTO efetuarPagamento(PaymentRequest paymentRequest) {
+    public TransactionDTO createPayment(PaymentRequest paymentRequest) {
         
         
         if(repository.existsByTransacaoId(paymentRequest.transactionId())) {
-            throw new BusinessException("Já existe um pagamento para a transação com o ID fornecido.");
+            throw new PaymentException("Já existe um pagamento para a transação com o ID fornecido.");
         }
         
-        final var descricaoPagamento = Descricao.from(
+        final var paymentDescription = Description.from(
                 paymentRequest.paymentDescription()
         );
 
         TransactionDTO newPagamento = TransactionDTO.with(
                 paymentRequest.transactionId(),
                 paymentRequest.cartNumber(),
-                descricaoPagamento,
+                paymentDescription,
                 paymentRequest.payment()
         );
         
         return repository.save(
-                TransacaoEntity.from(newPagamento)
+                TransactionEntity.from(newPagamento)
         ).toDto();
     }
  }

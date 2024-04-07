@@ -2,20 +2,20 @@ package com.jeancabral.ToolsChalenge.model;
 
 import java.util.Date;
 
-public record DescricaoPagamento(
+public record PaymentDescription(
         
         double valor,
         Date dataHora,
         String estabelecimento
 ) {
     
-    public static DescricaoPagamento with(
+    public static PaymentDescription with(
             final double valor,
             final Date date,
             final String establishment
     ) {
         
-        return new DescricaoPagamento(
+        return new PaymentDescription(
                 valor,
                 date,
                 establishment

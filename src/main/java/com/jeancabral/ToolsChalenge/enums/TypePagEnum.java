@@ -1,6 +1,6 @@
 package com.jeancabral.ToolsChalenge.enums;
 
-public enum TipoPagEnum {
+public enum TypePagEnum {
 
     AVISTA,
     PARCELADO_LOJA,

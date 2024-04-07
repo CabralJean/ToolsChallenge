@@ -3,36 +3,35 @@ package com.jeancabral.ToolsChalenge.controller;
 import com.jeancabral.ToolsChalenge.dto.ListPaymentResponse;
 import com.jeancabral.ToolsChalenge.dto.PaymentRequest;
 import com.jeancabral.ToolsChalenge.dto.PaymentResponse;
-import com.jeancabral.ToolsChalenge.service.impl.PagamentoService;
+import com.jeancabral.ToolsChalenge.service.impl.PaymentService;
 import com.jeancabral.ToolsChalenge.wrapper.TransactionWrapper;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/transacoes")
-public class PagamentoController {
+@RequestMapping("/api/transaction")
+public class PaymentController {
     
-    private final PagamentoService pagamentoService;
+    private final PaymentService pagamentoService;
 
-    public PagamentoController(PagamentoService transacaoService) {
+    public PaymentController(PaymentService transacaoService) {
         this.pagamentoService = transacaoService;
     }
 
     @GetMapping
-    public ResponseEntity<ListPaymentResponse> buscaTransacoes() {
+    public ResponseEntity<ListPaymentResponse> findTransactions() {
        
-        final var result = pagamentoService.buscarPagamentos();
+        final var result = pagamentoService.findTransactions();
        
         return ResponseEntity.ok().body(
                 ListPaymentResponse.from(result)
         );
     }
 
-    @GetMapping("/{transacaoId}")
-    public ResponseEntity<TransactionWrapper> buscaTransacaoId(@PathVariable Long transacaoId) {
+    @GetMapping("/{transactionId}")
+    public ResponseEntity<TransactionWrapper> findTransactionById(@PathVariable Long transactionId) {
         
-        final var result = pagamentoService.buscarTransacaoId(transacaoId);
+        final var result = pagamentoService.findTransactionById(transactionId);
         
         return ResponseEntity.ok().body(
                 new TransactionWrapper(PaymentResponse.from(result)));
@@ -40,10 +39,10 @@ public class PagamentoController {
     }
 
 
-    @PostMapping("/pagamento")
-    public ResponseEntity<TransactionWrapper> pagamento(@RequestBody PaymentRequest pagamentoDto){
+    @PostMapping("/payment")
+    public ResponseEntity<TransactionWrapper> createPayment(@RequestBody PaymentRequest paymentDto){
        
-        final var result = pagamentoService.efetuarPagamento(pagamentoDto);
+        final var result = pagamentoService.createPayment(paymentDto);
        
         return ResponseEntity.ok()
                 .body(new TransactionWrapper(PaymentResponse.from(result)));

@@ -2,28 +2,28 @@ package com.jeancabral.ToolsChalenge.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.jeancabral.ToolsChalenge.model.DescricaoPagamento;
-import com.jeancabral.ToolsChalenge.model.FormaPagamento;
+import com.jeancabral.ToolsChalenge.model.PaymentDescription;
+import com.jeancabral.ToolsChalenge.model.PaymentMethod;
 
-@JsonPropertyOrder({"id", "num_cartao", "description", "paymentMethod"})
+@JsonPropertyOrder({"id", "cartao", "descricao", "formaPagamento"})
 public record PaymentRequest(
         @JsonProperty("id")
         Long transactionId,
         
-        @JsonProperty("num_cartao")
+        @JsonProperty("cartao")
         String cartNumber,
-        @JsonProperty("description")
-        DescricaoPagamento paymentDescription,
-        @JsonProperty("paymentMethod")
-        FormaPagamento payment
+        @JsonProperty("descricao")
+        PaymentDescription paymentDescription,
+        @JsonProperty("formaPagamento")
+        PaymentMethod payment
 ) {
     
     public static PaymentRequest with(
             
             final Long id,
             final String cartNumber,
-            final DescricaoPagamento paymentDescription,
-            final FormaPagamento payment
+            final PaymentDescription paymentDescription,
+            final PaymentMethod payment
     ) {
         
         return new PaymentRequest(

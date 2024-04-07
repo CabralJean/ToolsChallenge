@@ -1,22 +1,22 @@
 package com.jeancabral.ToolsChalenge.dto;
 
-import com.jeancabral.ToolsChalenge.model.Descricao;
-import com.jeancabral.ToolsChalenge.model.FormaPagamento;
+import com.jeancabral.ToolsChalenge.model.Description;
+import com.jeancabral.ToolsChalenge.model.PaymentMethod;
 
 public record TransactionDTO(
         
         Long transacaoId,
         String numCartao,
-        Descricao descricao,
-        FormaPagamento formaPagamento
+        Description descricao,
+        PaymentMethod formaPagamento
 ) {
    
     
     public static TransactionDTO with(
             final Long transacaoId,
             final String numCartao,
-            final Descricao descricao,
-            final FormaPagamento formaPagamento
+            final Description descricao,
+            final PaymentMethod formaPagamento
     ) {
         
         return new TransactionDTO(

@@ -4,13 +4,14 @@ import com.jeancabral.ToolsChalenge.UnitTest;
 import com.jeancabral.ToolsChalenge.dto.PaymentRequest;
 import com.jeancabral.ToolsChalenge.dto.TransactionDTO;
 import com.jeancabral.ToolsChalenge.enums.StatusEnum;
-import com.jeancabral.ToolsChalenge.enums.TipoPagEnum;
+import com.jeancabral.ToolsChalenge.enums.TypePagEnum;
 import com.jeancabral.ToolsChalenge.exception.BusinessException;
 import com.jeancabral.ToolsChalenge.exception.NotFoundException;
-import com.jeancabral.ToolsChalenge.model.Descricao;
-import com.jeancabral.ToolsChalenge.model.DescricaoPagamento;
-import com.jeancabral.ToolsChalenge.model.FormaPagamento;
-import com.jeancabral.ToolsChalenge.model.TransacaoEntity;
+import com.jeancabral.ToolsChalenge.exception.PaymentException;
+import com.jeancabral.ToolsChalenge.model.Description;
+import com.jeancabral.ToolsChalenge.model.PaymentDescription;
+import com.jeancabral.ToolsChalenge.model.PaymentMethod;
+import com.jeancabral.ToolsChalenge.model.TransactionEntity;
 import com.jeancabral.ToolsChalenge.repository.TransactionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -36,7 +37,7 @@ class PagamentoServiceTest  extends UnitTest {
     private TransactionRepository repository;
     
     @InjectMocks
-    private PagamentoService pagamentoService;
+    private PaymentService pagamentoService;
 
     @BeforeEach
     void setup(){}
@@ -55,13 +56,13 @@ class PagamentoServiceTest  extends UnitTest {
         final var expectedDescriptionStatus = StatusEnum.AUTORIZADO.name();
         
         final var expectedPaymentInstallments = 1;
-        final var expectedPaymentType = TipoPagEnum.AVISTA;
+        final var expectedPaymentType = TypePagEnum.AVISTA;
         
         final var expectedPaymentsResponse = List.of(
                 TransactionDTO.with(
                         expectedTransactionId,
                         expectedCartNumber,
-                        Descricao.with(
+                        Description.with(
                                 expectedDescriptionValue,
                                 expectedDate,
                                 expectedDescriptionEstablishment,
@@ -69,7 +70,7 @@ class PagamentoServiceTest  extends UnitTest {
                                 expectedDescriptionAuthorization,
                                 expectedDescriptionStatus
                         ),
-                        FormaPagamento.with(
+                        PaymentMethod.with(
                         expectedPaymentType.name(),
                         expectedPaymentInstallments
                         )
@@ -78,13 +79,13 @@ class PagamentoServiceTest  extends UnitTest {
         
         final var expectedPayments = mapTo(
                 expectedPaymentsResponse,
-                TransacaoEntity::from
+                TransactionEntity::from
         );
         
         when(repository.findAll())
                 .thenReturn(expectedPayments);
         
-        final var actual = pagamentoService.buscarPagamentos();
+        final var actual = pagamentoService.findTransactions();
         
         verify(repository).findAll();
         assertEquals(expectedPayments.size(), actual.size());
@@ -105,12 +106,12 @@ class PagamentoServiceTest  extends UnitTest {
         final var expectedDescriptionStatus = StatusEnum.AUTORIZADO.name();
         
         final var expectedPaymentInstallments = 1;
-        final var expectedPaymentType = TipoPagEnum.AVISTA;
+        final var expectedPaymentType = TypePagEnum.AVISTA;
         
         final var expectedDTO = TransactionDTO.with(
                 1234L,
                 "NUM_CARTAO",
-                Descricao.with(
+                Description.with(
                         expectedDescriptionValue,
                         expectedDate,
                         expectedDescriptionEstablishment,
@@ -118,18 +119,18 @@ class PagamentoServiceTest  extends UnitTest {
                         expectedDescriptionAuthorization,
                         expectedDescriptionStatus
                 ),
-                FormaPagamento.with(
+                PaymentMethod.with(
                         expectedPaymentType.name(),
                         expectedPaymentInstallments
                 )
         );
         
-        final var expectedTransactionEntity = TransacaoEntity.from(expectedDTO);
+        final var expectedTransactionEntity = TransactionEntity.from(expectedDTO);
         
         when(repository.findById(any()))
                 .thenReturn(Optional.of(expectedTransactionEntity));
         
-        final var actual = pagamentoService.buscarTransacaoId(expectedTransactionId);
+        final var actual = pagamentoService.findTransactionById(expectedTransactionId);
         
         verify(repository).findById(expectedTransactionId);
         assertEquals(expectedTransactionEntity.getTransacaoId(), actual.transacaoId());
@@ -145,7 +146,7 @@ class PagamentoServiceTest  extends UnitTest {
     
         final var actual = assertThrows(
                 NotFoundException.class,
-                () -> pagamentoService.buscarTransacaoId(expectedNotFoundTransactionId)
+                () -> pagamentoService.findTransactionById(expectedNotFoundTransactionId)
         );
         
         final var expectedErrorMessage = "Transação não encontrada.";
@@ -163,15 +164,15 @@ class PagamentoServiceTest  extends UnitTest {
         
         final var expectedTransactionId = 1234L;
         final var expectedCartNumber = "1223435344454545";
-        final var expectedDescriptionPayment = DescricaoPagamento.with(
+        final var expectedDescriptionPayment = PaymentDescription.with(
                 expectedDescriptionValue,
                 expectedDate,
                 expectedDescriptionEstablishment
         );
         
         final var expectedPaymentInstallments = 1;
-        final var expectedPaymentType = TipoPagEnum.AVISTA;
-        final var expectedPayment = FormaPagamento.with(
+        final var expectedPaymentType = TypePagEnum.AVISTA;
+        final var expectedPayment = PaymentMethod.with(
                 expectedPaymentType.name(),
                 expectedPaymentInstallments
         );
@@ -187,11 +188,11 @@ class PagamentoServiceTest  extends UnitTest {
         final var expectedTransaction = TransactionDTO.with(
                 expectedRequest.transactionId(),
                 expectedRequest.cartNumber(),
-                Descricao.from(expectedDescriptionPayment),
+                Description.from(expectedDescriptionPayment),
                 expectedPayment
         );
         
-        final var expectedEntity = TransacaoEntity.from(expectedTransaction);
+        final var expectedEntity = TransactionEntity.from(expectedTransaction);
         
         when(repository.existsByTransacaoId(any()))
                 .thenReturn(Boolean.FALSE);
@@ -199,7 +200,7 @@ class PagamentoServiceTest  extends UnitTest {
         when(repository.save(any()))
                 .thenReturn(expectedEntity);
         
-        final var actual = pagamentoService.efetuarPagamento(expectedRequest);
+        final var actual = pagamentoService.createPayment(expectedRequest);
         
         assertNotNull(actual);
         assertNotNull(actual.descricao().getNsu());
@@ -208,7 +209,7 @@ class PagamentoServiceTest  extends UnitTest {
     }
     
     @Test
-    @DisplayName("Deve lançar BusinessException quando pagamento ja foi efetuado")
+    @DisplayName("Deve lançar PaymentException quando pagamento ja foi efetuado")
     void testAlreadyTake() {
         
         final var expectedDate = new Date();
@@ -217,15 +218,15 @@ class PagamentoServiceTest  extends UnitTest {
         
         final var expectedTransactionId = 1234L;
         final var expectedCartNumber = "1223435344454545";
-        final var expectedDescriptionPayment = DescricaoPagamento.with(
+        final var expectedDescriptionPayment = PaymentDescription.with(
                 expectedDescriptionValue,
                 expectedDate,
                 expectedDescriptionEstablishment
         );
         
         final var expectedPaymentInstallments = 1;
-        final var expectedPaymentType = TipoPagEnum.AVISTA;
-        final var expectedPayment = FormaPagamento.with(
+        final var expectedPaymentType = TypePagEnum.AVISTA;
+        final var expectedPayment = PaymentMethod.with(
                 expectedPaymentType.name(),
                 expectedPaymentInstallments
         );
@@ -242,8 +243,8 @@ class PagamentoServiceTest  extends UnitTest {
                 .thenReturn(Boolean.TRUE);
         
         final var actual = assertThrows(
-                BusinessException.class,
-                () -> pagamentoService.efetuarPagamento(expectedRequest)
+                PaymentException.class,
+                () -> pagamentoService.createPayment(expectedRequest)
         );
         
         final var expectedErrorMessage = "Já existe um pagamento para a transação com o ID fornecido.";
