@@ -47,7 +47,7 @@ public class PaymentControllerTest {
     void testListTransactions() throws Exception {
         
         final var expectedTransactionId = 1234L;
-        final var expectedCartNumber = "12039494950506060";
+        final var expectedCartNumber = "1203*****6060";
         final var expectedDate = new Date();
         final var expectedDescriptionValue = 20.00;
         final var expectedDescriptionEstablishment = "LOJA 01";
@@ -115,7 +115,7 @@ public class PaymentControllerTest {
     void testPayment() throws Exception {
         
         final var expectedTransactionId = 1234L;
-        final var expectedCartNumber = "12039494950506060";
+        final var expectedCartNumber = "1203*****6060";
         final var expectedDate = new Date();
         final var expectedDescriptionValue = 20.00;
         final var expectedDescriptionEstablishment = "LOJA 01";
@@ -200,7 +200,7 @@ public class PaymentControllerTest {
     void testFindTransactionById() throws Exception {
 
         final var expectedTransactionId = 1234L;
-        final var expectedCartNumber = "12039494950506060";
+        final var expectedCartNumber = "1203*****6060";
         final var expectedDate = new Date();
         final var expectedDescriptionValue = 20.00;
         final var expectedDescriptionEstablishment = "LOJA 01";

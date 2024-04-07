@@ -7,7 +7,7 @@ Este é um exemplo de documentação para um projeto que inclui código de teste
 
 Para o projeto foram utilizados os princípios do Clean Code, mantendo um conjunto de boas práticas para facilitar a leitura e menutenção do código.
 A API teve como utilização os conceitos REST, JSON e protocolo padrão HTTP de retorno.
-O servidor da aplicação utilizado foi o SpringBoot.
+O servidor da aplicação utilizado foi o Tomcat.
 Foi utilizado o banco de dados em memória `H2` para guardar as transações.
 Para persistir os dados foi utilizado o `Spring JPA`.
 
