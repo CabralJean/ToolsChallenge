@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/reversal")
+@RequestMapping("/api/v1/reversal")
 public class ReversalController {
 
     private final ReversalService service;

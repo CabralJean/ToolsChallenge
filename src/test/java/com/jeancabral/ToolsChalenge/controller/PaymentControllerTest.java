@@ -34,7 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ControllerTest
 public class PaymentControllerTest {
     
-    private final static String BASE_URL = "/api/transaction";
+    private final static String BASE_URL = "/api/v1/transaction";
     
     @Autowired
     private MockMvc mvc;

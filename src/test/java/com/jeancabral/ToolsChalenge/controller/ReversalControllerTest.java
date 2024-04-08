@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ControllerTest
 public class ReversalControllerTest {
 
-    private final static String BASE_URL = "/api/reversal";
+    private final static String BASE_URL = "/api/v1/reversal";
 
     @Autowired
     private MockMvc mvc;
